@@ -1,57 +1,154 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Text, Image, ScrollView, TextInput, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+
 import LinearGradient from "react-native-linear-gradient";
 import styles from "./styles";
 
-import Logo from '../assets/logo.jpeg'
+import Arrow from '../assets/arrow-left.png'
 import Enviar from '../assets/enviar.png'
 
-const Chat = () => {
+const Chat = ({ route }) => {
+    const navigation = useNavigation()
 
-    const [conversa, setConversa] = useState([
-        { user: "1", hours: "12:00", text: "Quis pariatur dolore dolore sit." },
-        { user: "1", hours: "12:10", text: "Fugiat quis culpa consequat sunt amet." },
-        { user: "1", hours: "12:15", text: "Laboris cupidatat labore sunt dolore non est occaecat irure cupidatat nostrud." },
-        { user: "2", hours: "12:30", text: "Aute labore ad non qui ullamco irure elit." },
-        { user: "1", hours: "12:32", text: "Qui sint irure dolor nisi cillum occaecat ut proident cupidatat aliqua minim ipsum." },
-        { user: "2", hours: "12:33", text: "Occaecat sint reprehenderit labore magna laboris nostrud nostrud irure minim Lorem ex laborum." },
-        { user: "1", hours: "12:40", text: "Duis eu fugiat ea dolore commodo culpa." },
-        { user: "2", hours: "12:40", text: "Aliqua do tempor proident sint Lorem mollit est ipsum eiusmod officia nulla." },
-        { user: "2", hours: "12:43", text: "Nulla ad est quis qui veniam dolor elit elit non nostrud ut." },
-        { user: "2", hours: "12:45", text: "Mollit consectetur adipisicing aute labore voluptate eiusmod proident sunt fugiat dolor exercitation ut dolore ex." },
-        { user: "1", hours: "12:48", text: "Deserunt aliqua in labore sunt nostrud est officia commodo eiusmod fugiat nulla ullamco incididunt." },
-        { user: "2", hours: "12:50", text: "Id deserunt id commodo exercitation nulla cupidatat enim dolore enim velit." },
-        { user: "1", hours: "12:52", text: "Lorem nostrud magna dolor enim commodo eu ipsum deserunt mollit sit nulla enim nostrud consectetur." },
-        { user: "2", hours: "12:55", text: "Consequat aute irure anim ut voluptate Lorem." },
-        { user: "1", hours: "12:57", text: "Ad ut quis reprehenderit incididunt." },
-    ])
+    const { userId, userImage, userName, roomId } = route.params
+    const [loading, setLoading] = useState(true)
+    const [conversa, setConversa] = useState()
+    const [message, setMessage] = useState()
+    const scrollViewRef = useRef(null);
+
+    const getRoom = () => {
+        var config = {
+            method: 'get',
+            url: `https://rcw33xmhy9.execute-api.us-east-1.amazonaws.com/prd/api/chat/${roomId}/messages`,
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Basic U2VydmljZXNMYW1iZGFfTGVhcFN0eWxlOiMyMDIzQFNlcnZpY2VzTGFtYmRhX0xlYXBTdHlsZSR0aW1lbGluZQ=='
+            }
+        };
+
+        axios(config)
+            .then(function (response) {
+                if (response.status === 200) {
+                    //console.log(response.data.messages)
+                    const regex = /(\d{2}:\d{2})/;
+
+                    /*const formattedMessages = response.data.messages.map(message => {
+                        const match = regex.exec(message.createdAt);
+                        const hora = match ? match[1] : "Hora não encontrada";
+
+                        return {
+                            ...message,
+                            createdAt: hora
+                        };
+                    });*/
+
+                    const formattedMessages = response.data.messages.map(message => {
+                        const date = new Date(message.createdAt);
+                        const formattedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+                        const match = regex.exec(message.createdAt);
+                        const hora = match ? match[1] : "Hora não encontrada";
+
+                        return {
+                            ...message,
+                            createdAt: formattedDate,
+                            hour: hora
+                        };
+                    });
+
+                    const messagesByDate = {};
+                    formattedMessages.forEach(message => {
+                        if (!messagesByDate[message.createdAt]) {
+                            messagesByDate[message.createdAt] = [];
+                        }
+                        messagesByDate[message.createdAt].push(message);
+                    });
+
+                    setConversa(formattedMessages)
+                    setLoading(false)
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    const setTextMessage = () => {
+        var data = JSON.stringify({ "user": `${userId}`, "text": `${message}` });
+        var config = {
+            method: 'post',
+            url: `https://rcw33xmhy9.execute-api.us-east-1.amazonaws.com/prd/api/chat/${roomId}/sendMessage`,
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Basic U2VydmljZXNMYW1iZGFfTGVhcFN0eWxlOiMyMDIzQFNlcnZpY2VzTGFtYmRhX0xlYXBTdHlsZSR0aW1lbGluZQ==',
+                'Content-Type': 'application/json'
+            },
+            data: data
+        };
+
+        axios(config)
+            .then(function (response) {
+                setMessage('')
+                scrollToEnd()
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    const scrollToEnd = () => {
+        if (scrollViewRef.current) {
+            scrollViewRef.current.scrollToEnd({ animated: true });
+        }
+    };
+
+    useEffect(() => {
+        getRoom()
+    }, [])
+
+    useEffect(() => {
+        const intervalId = setInterval(getRoom, 1000);
+        return () => clearInterval(intervalId);
+    }, []);
 
     return (
         <LinearGradient colors={styles.backgroundGradient} style={styles.container}>
             <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.navigate('LogIn')}>
+                    <Image
+                        source={Arrow}
+                        resizeMode="contain"
+                        style={{ width: 20, height: 20, tintColor: '#fff', marginLeft: 10, marginRight: 20 }}
+                    />
+                </TouchableOpacity>
                 <Image
-                    source={Logo}
+                    source={{ uri: userImage }}
                     resizeMode="contain"
                     style={styles.userLogo}
                 />
                 <View style={styles.titleHeader}>
-                    <Text style={styles.textHeader}>Leap Style</Text>
+                    <Text style={styles.textHeader}>{userName ? userName : 'Leap Style'}</Text>
                     <Text style={[styles.textHeader, { color: '#1ecb00' }]}>Online</Text>
                 </View>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} >
-                <Text style={{ color: '#fff', textAlign: 'center', marginVertical: 10 }}>Hoje</Text>
-                {conversa.map((result) => (
-                    <LinearGradient
-                        colors={result.user === "1" ? styles.cardYouGradient : styles.cardHeGradient}
-                        style={result.user === "1" ? styles.cardYou : styles.cardHe}
-                        start={{ x: 1, y: 0 }}
-                    >
-                        <Text style={styles.textCard}>{result.text}</Text>
-                        <Text style={styles.hourTextCard}>{result.hours}</Text>
-                    </LinearGradient>
-                ))}
+            <ScrollView showsVerticalScrollIndicator={false} ref={scrollViewRef} onContentSizeChange={() => scrollToEnd()} >
+                {!loading &&
+                    conversa.map((result) => (
+                        <>
+                            <Text style={{ color: '#fff', textAlign: 'center', marginVertical: 10 }}>{result.createdAt}</Text>
+                            <LinearGradient
+                                colors={result.user._id === userId ? styles.cardYouGradient : styles.cardHeGradient}
+                                style={result.user._id === userId ? styles.cardYou : styles.cardHe}
+                                start={{ x: 1, y: 0 }}
+                            >
+                                <Text style={styles.textCard}>{result.text}</Text>
+                                <Text style={styles.hourTextCard}>{result.hour}</Text>
+                            </LinearGradient>
+                        </>
+                    ))
+                }
             </ScrollView>
 
             <View style={styles.containerInput}>
@@ -59,9 +156,10 @@ const Chat = () => {
                     style={styles.inputText}
                     placeholder="Insira seu texto"
                     placeholderTextColor={'#737373'}
+                    onChangeText={setMessage}
                 />
 
-                <TouchableOpacity style={{}}>
+                <TouchableOpacity onPress={() => setTextMessage()}>
                     <Image
                         source={Enviar}
                         resizeMode="container"

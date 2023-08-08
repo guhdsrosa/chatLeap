@@ -5,11 +5,11 @@
  * @format
  */
 
-import Chat from "./src/screens/chat";
+import Routes from './src/routes'
 
 function App(): JSX.Element {
   return (
-    <Chat/>
+    <Routes/>
   );
 }
 

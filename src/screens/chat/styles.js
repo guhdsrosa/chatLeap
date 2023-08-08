@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         backgroundColor: '#1f1f1f',
-        paddingHorizontal: 30,
+        paddingHorizontal: 0,
         paddingVertical: 20,
         alignItems: 'center'
     },
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     userLogo: {
         width: 50,
         height: 50,
-        borderRadius: 10
+        borderRadius: 100
     },
 
     titleHeader: {
@@ -58,8 +58,8 @@ const styles = StyleSheet.create({
     hourTextCard: {
         position: 'absolute',
         color: '#d8d8d8',
-        right: 5,
-        bottom: 3,
+        right: 6,
+        bottom: 5,
         fontSize: 13
     },
 
