@@ -5,79 +5,95 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 
-    backgroundGradient: ['#191015', '#330d22'],
+    backgroundGradient: ['#fff', '#fff'],
 
     header: {
         flexDirection: 'row',
-        backgroundColor: '#1f1f1f',
+        backgroundColor: '#fff',
         paddingHorizontal: 0,
         paddingVertical: 20,
-        alignItems: 'center'
+        alignItems: 'center',
+
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+
+        elevation: 5,
     },
 
     userLogo: {
-        width: 50,
-        height: 50,
+        width: 40,
+        height: 40,
         borderRadius: 100
     },
 
     titleHeader: {
-        marginLeft: 15
+        marginLeft: 14
     },
 
     textHeader: {
-        color: '#fff',
-        fontSize: 16
+        color: '#000',
+        fontSize: 14
     },
 
     cardYou: {
         marginVertical: 5,
         marginLeft: '25%',
         marginRight: 5,
-        padding: 10,
-        borderRadius: 10
+        padding: 15,
+        borderWidth: 1,
+        borderColor: '#cccccc',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        borderBottomLeftRadius: 20
     },
 
     cardHe: {
         marginVertical: 5,
         marginRight: '25%',
         marginLeft: 5,
-        padding: 10,
-        borderRadius: 10,
+        padding: 15,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        borderBottomRightRadius: 20
     },
 
-    cardYouGradient: ['#e2037b', '#fc8e04'],
-    cardHeGradient: ['#1f1f1f', '#1f1f1f'],
+    cardYouGradient: ['#fff', '#fff'],
+    cardHeGradient: ['#f5f5f5', '#f5f5f5'],
 
     textCard: {
-        color: '#fff',
+        color: '#686868',
         fontSize: 15,
         paddingBottom: 12
     },
 
     hourTextCard: {
         position: 'absolute',
-        color: '#d8d8d8',
-        right: 6,
-        bottom: 5,
+        color: '#b4b4b4',
+        right: 10,
+        bottom: 7,
         fontSize: 13
     },
 
     containerInput: {
-        backgroundColor: '#1f1f1f',
-        flexDirection: 'row',
-        alignItems: 'center'
+        backgroundColor: '#fff',
+        width: '100%',
+        position: 'absolute',
+        bottom: 0
     },
 
     inputText: {
-        backgroundColor: '#272526',
+        backgroundColor: '#f5f5f5',
         marginVertical: 10,
         borderRadius: 10,
         marginLeft: 10,
-        marginRight: 10,
+        marginRight: 70,
         paddingHorizontal: 10,
-        minWidth: 330,
-        color: '#fff'
+        color: '#686868'
     },
 })
 

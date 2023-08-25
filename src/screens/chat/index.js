@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Image, ScrollView, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, Image, ScrollView, TextInput, TouchableOpacity, FlatList } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 
@@ -14,14 +14,14 @@ const Chat = ({ route }) => {
 
     const { userId, userImage, userName, roomId } = route.params
     const [loading, setLoading] = useState(true)
-    const [conversa, setConversa] = useState()
+    const [conversa, setConversa] = useState(null)
     const [message, setMessage] = useState()
     const scrollViewRef = useRef(null);
 
     const getRoom = () => {
         var config = {
             method: 'get',
-            url: `https://rcw33xmhy9.execute-api.us-east-1.amazonaws.com/prd/api/chat/${roomId}/messages`,
+            url: `https://flrouf4u09.execute-api.us-east-1.amazonaws.com/prd/api/chat/${roomId}/messages`,
             headers: {
                 'Accept': 'application/json',
                 'Authorization': 'Basic U2VydmljZXNMYW1iZGFfTGVhcFN0eWxlOiMyMDIzQFNlcnZpY2VzTGFtYmRhX0xlYXBTdHlsZSR0aW1lbGluZQ=='
@@ -31,41 +31,7 @@ const Chat = ({ route }) => {
         axios(config)
             .then(function (response) {
                 if (response.status === 200) {
-                    //console.log(response.data.messages)
-                    const regex = /(\d{2}:\d{2})/;
-
-                    /*const formattedMessages = response.data.messages.map(message => {
-                        const match = regex.exec(message.createdAt);
-                        const hora = match ? match[1] : "Hora não encontrada";
-
-                        return {
-                            ...message,
-                            createdAt: hora
-                        };
-                    });*/
-
-                    const formattedMessages = response.data.messages.map(message => {
-                        const date = new Date(message.createdAt);
-                        const formattedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-                        const match = regex.exec(message.createdAt);
-                        const hora = match ? match[1] : "Hora não encontrada";
-
-                        return {
-                            ...message,
-                            createdAt: formattedDate,
-                            hour: hora
-                        };
-                    });
-
-                    const messagesByDate = {};
-                    formattedMessages.forEach(message => {
-                        if (!messagesByDate[message.createdAt]) {
-                            messagesByDate[message.createdAt] = [];
-                        }
-                        messagesByDate[message.createdAt].push(message);
-                    });
-
-                    setConversa(formattedMessages)
+                    setConversa(response.data.messages)
                     setLoading(false)
                 }
             })
@@ -75,26 +41,28 @@ const Chat = ({ route }) => {
     }
 
     const setTextMessage = () => {
-        var data = JSON.stringify({ "user": `${userId}`, "text": `${message}` });
-        var config = {
-            method: 'post',
-            url: `https://rcw33xmhy9.execute-api.us-east-1.amazonaws.com/prd/api/chat/${roomId}/sendMessage`,
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': 'Basic U2VydmljZXNMYW1iZGFfTGVhcFN0eWxlOiMyMDIzQFNlcnZpY2VzTGFtYmRhX0xlYXBTdHlsZSR0aW1lbGluZQ==',
-                'Content-Type': 'application/json'
-            },
-            data: data
-        };
-
-        axios(config)
-            .then(function (response) {
-                setMessage('')
-                scrollToEnd()
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+        if(message !== ''){
+            var data = JSON.stringify({ "user": `${userId}`, "text": `${message}` });
+            var config = {
+                method: 'post',
+                url: `https://rcw33xmhy9.execute-api.us-east-1.amazonaws.com/prd/api/chat/${roomId}/sendMessage`,
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': 'Basic U2VydmljZXNMYW1iZGFfTGVhcFN0eWxlOiMyMDIzQFNlcnZpY2VzTGFtYmRhX0xlYXBTdHlsZSR0aW1lbGluZQ==',
+                    'Content-Type': 'application/json'
+                },
+                data: data
+            };
+    
+            axios(config)
+                .then(function (response) {
+                    setMessage('')
+                    scrollToEnd()
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
     }
 
     const scrollToEnd = () => {
@@ -115,11 +83,11 @@ const Chat = ({ route }) => {
     return (
         <LinearGradient colors={styles.backgroundGradient} style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.navigate('LogIn')}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Image
                         source={Arrow}
                         resizeMode="contain"
-                        style={{ width: 20, height: 20, tintColor: '#fff', marginLeft: 10, marginRight: 20 }}
+                        style={{ width: 17, height: 17, tintColor: '#d40b36', marginLeft: 10, marginRight: 20 }}
                     />
                 </TouchableOpacity>
                 <Image
@@ -129,43 +97,57 @@ const Chat = ({ route }) => {
                 />
                 <View style={styles.titleHeader}>
                     <Text style={styles.textHeader}>{userName ? userName : 'Leap Style'}</Text>
-                    <Text style={[styles.textHeader, { color: '#1ecb00' }]}>Online</Text>
+                    <Text style={[styles.textHeader, { color: '#b2b2b2' }]}>Online</Text>
                 </View>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} ref={scrollViewRef} onContentSizeChange={() => scrollToEnd()} >
+            <View style={{paddingBottom: 150}}>
                 {!loading &&
-                    conversa.map((result) => (
-                        <>
-                            <Text style={{ color: '#fff', textAlign: 'center', marginVertical: 10 }}>{result.createdAt}</Text>
-                            <LinearGradient
-                                colors={result.user._id === userId ? styles.cardYouGradient : styles.cardHeGradient}
-                                style={result.user._id === userId ? styles.cardYou : styles.cardHe}
-                                start={{ x: 1, y: 0 }}
-                            >
-                                <Text style={styles.textCard}>{result.text}</Text>
-                                <Text style={styles.hourTextCard}>{result.hour}</Text>
-                            </LinearGradient>
-                        </>
-                    ))
+                    <FlatList
+                        data={conversa}
+                        keyExtractor={(item, index) => index.toString()}
+                        showsVerticalScrollIndicator={false}
+                        ref={scrollViewRef}
+                        onContentSizeChange={() => scrollToEnd()}
+                        renderItem={({ item }) => (
+                            <View style={{marginHorizontal: 5}}>
+                                <Text style={{ color: '#b2b2b2', textAlign: 'center', marginVertical: 10 }}>{`${item.day.toString().padStart(2, '0')}/${item.month.toString().padStart(2, '0')}/${item.year}`}</Text>
+                                {item.messages.map(message => (
+                                    <LinearGradient
+                                        colors={message.user?._id === userId ? styles.cardYouGradient : styles.cardHeGradient}
+                                        style={message.user?._id === userId ? styles.cardYou : styles.cardHe}
+                                        start={{ x: 1, y: 0 }}
+                                        key={message._id}
+                                    >
+                                        <Text style={styles.textCard}>{`${message.text}`}</Text>
+                                        <Text style={styles.hourTextCard}>{message.createdAt.substring(11, 16)}</Text>
+                                    </LinearGradient>
+                                ))}
+                            </View>
+                        )}
+                    />
+
                 }
-            </ScrollView>
+            </View>
 
             <View style={styles.containerInput}>
                 <TextInput
                     style={styles.inputText}
                     placeholder="Insira seu texto"
-                    placeholderTextColor={'#737373'}
+                    placeholderTextColor={'#686868'}
                     onChangeText={setMessage}
+                    value={message}
                 />
 
-                <TouchableOpacity onPress={() => setTextMessage()}>
-                    <Image
-                        source={Enviar}
-                        resizeMode="container"
-                        style={{ width: 25, height: 25, tintColor: '#fc8e04' }}
-                    />
-                </TouchableOpacity>
+                <View style={{position: 'absolute', right: 0, marginVertical: 20, marginHorizontal: 20}}>
+                    <TouchableOpacity onPress={() => setTextMessage()}>
+                        <Image
+                            source={Enviar}
+                            resizeMode="contain"
+                            style={{ width: 30, height: 30, tintColor: '#d40b36'}}
+                        />
+                    </TouchableOpacity>
+                </View>
             </View>
         </LinearGradient>
     )

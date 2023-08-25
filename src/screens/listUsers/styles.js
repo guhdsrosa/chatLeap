@@ -5,21 +5,31 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 
-    backgroundGradient: ['#191015', '#330d22'],
-    //backgroundGradient: ['#fff', '#fff'],
+    //backgroundGradient: ['#191015', '#330d22'],
+    backgroundGradient: ['#fff', '#fff'],
 
     header: {
         flexDirection: 'row',
-        backgroundColor: '#1f1f1f',
+        backgroundColor: '#fff',
         paddingHorizontal: 30,
         paddingVertical: 20,
-        alignItems: 'center'
+        marginBottom: 5,
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+
+        elevation: 5,
     },
 
     userLogo: {
-        width: 50,
-        height: 50,
-        borderRadius: 10
+        width: 40,
+        height: 40,
+        borderRadius: 100
     },
 
     titleHeader: {
@@ -27,14 +37,13 @@ const styles = StyleSheet.create({
     },
 
     textHeader: {
-        color: '#fff',
-        fontSize: 16
+        color: '#000',
+        fontSize: 14
     },
 
     userText: {
-        color: '#fff',
-        //color: '#000',
-        fontSize: 17,
+        color: '#000',
+        fontSize: 13,
         paddingVertical: 10,
         paddingHorizontal: 20
     },
